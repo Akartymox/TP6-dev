@@ -1,0 +1,86 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  version: 2.0.0
+servers:
+  - url: /api-v1
+    description: API v1
+  - url: /api-v2
+    description: API v2
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+  schemas:
+    Link:
+      type: object
+      properties:
+        url: { type: string }
+        short: { type: string }
+        created: { type: integer }
+    Error:
+      type: object
+      properties:
+        code: { type: integer }
+        message: { type: string }
+
+paths:
+  /:
+    get:
+      summary: Nombre de liens
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+    post:
+      summary: Crée un lien raccourci
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string }
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Link" }
+        "400":
+          description: URL invalide
+
+  /{url}:
+    get:
+      summary: Informations ou redirection
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+        "404": { description: Non trouvé }
+    delete:
+      summary: Supprime un lien
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Supprimé }
+        "401": { description: Non authentifié }
+        "403": { description: Interdit }
+        "404": { description: Non trouvé }
