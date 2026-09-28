@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Réducteur d'URL</h1>
+      <p>Liens existants : <strong><%= count %></strong></p>
+
+      <form method="post" action="/api-v2/" id="submit-link">
+        <label for="url">Type the URL to shorten</label>
+        <input
+          name="url"
+          id="url"
+          type="url"
+          placeholder="https://perdu.com"
+          required
+        />
+        <button type="submit">Submit</button>
+      </form>
+
+      <% if (link) { %>
+      <div class="result">
+        <p>Lien créé :</p>
+        <a href="<%= link.shortUrl %>"><%= link.shortUrl %></a>
+      </div>
+      <% } %>
+    </div>
+  </body>
+</html>
