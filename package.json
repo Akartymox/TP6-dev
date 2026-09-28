@@ -1,0 +1,36 @@
+{
+  "name": "devweb-tp6",
+  "version": "1.0.0",
+  "description": "Réducteur d'URL Node.js/Express",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon server.mjs",
+    "prod": "cross-env NODE_ENV=production node server.mjs",
+    "format": "prettier \"**/*.{mjs,json,css,md}\" --write",
+    "lint": "eslint \"**/*.mjs\"",
+    "lint:fix": "eslint \"**/*.mjs\" --fix"
+  },
+  "author": "Liam J.",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "cross-env": "^10.1.0",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.9"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^18.0.4",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "http-errors": "^2.0.1",
+    "loglevel": "^1.9.2",
+    "morgan": "^1.12.1",
+    "serve-favicon": "^2.5.1",
+    "swagger-ui-express": "^5.0.1",
+    "yaml": "^2.9.1"
+  }
+}
