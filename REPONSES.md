@@ -1,5 +1,7 @@
 # TP6 — Réponses Partie 1
 
+*Version finale - à rendre.*
+
 ## Q1 — Commande httpie équivalente à curl POST
 
 \`\`\`bash
@@ -20,6 +22,7 @@ http POST http://localhost:8080/api-v1/ url="https://perdu.com"
 
 \`\`\`json
 "format": "prettier \"**/*.{mjs,json,css,md}\" --write"
+npm run format
 \`\`\`
 
 ## Q4 — Masquer X-Powered-By
@@ -53,6 +56,10 @@ Driver : **better-sqlite3**
 ## Q8 — Ouverture / fermeture de la connexion
 
 La connexion SQLite est ouverte **au chargement du module** `database/database.mjs` (donc au démarrage du serveur) et fermée **à l'arrêt du process** (fermeture par Node.js ou par le système). better-sqlite3 garde la connexion ouverte tant que le process vit.
+process.on("SIGINT", () => {
+  db.close();
+  process.exit(0);
+});
 
 ## Q9 — Cache Express
 
