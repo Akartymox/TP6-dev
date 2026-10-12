@@ -9,6 +9,7 @@ import YAML from "yaml";
 import { PORT, IS_DEV, APP_VERSION } from "./config.mjs";
 import apiV1 from "./router/api-v1.mjs";
 import apiV2 from "./router/api-v2.mjs";
+import * as db from "./database/database.mjs";
 
 logger.setLevel(IS_DEV ? logger.levels.DEBUG : logger.levels.WARN);
 
@@ -40,6 +41,26 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(spec));
 app.use("/api-v1", apiV1);
 app.use("/api-v2", apiV2);
 
+// Route racine pour les liens courts : /AK5tAa
+app.get("/:url", (request, response, next) => {
+  const link = db.findByUrl(request.params.url);
+  if (!link) return next(); // pas trouvé → passe au 404
+
+  response.format({
+    json: () =>
+      response.json({
+        created: link.created,
+        origin: link.origin,
+        visit: link.visit,
+      }),
+    html: () => {
+      db.incrementVisit(link.url);
+      return response.redirect(301, link.origin);
+    },
+    default: () => response.status(406).send("Not Acceptable"),
+  });
+});
+
 // 404
 app.use((request, _response, next) => {
   logger.debug(`default route handler : ${request.url}`);
@@ -51,9 +72,8 @@ app.use((error, _request, response, _next) => {
   logger.error(`default error handler: ${error}`);
   const status = error.status ?? 500;
   const stack = IS_DEV ? error.stack : "";
-  return response
-    .status(status)
-    .json({ code: status, message: error.message, stack });
+  const result = { code: status, message: error.message, stack };
+  return response.status(status).render("error", result);
 });
 
 app.listen(PORT, "0.0.0.0", () => {
