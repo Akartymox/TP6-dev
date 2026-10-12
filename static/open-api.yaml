@@ -2,11 +2,22 @@ openapi: 3.0.0
 info:
   title: URL Shortener API
   version: 2.0.0
+  description: |
+    API de réduction d'URL.
+    - API v1 : routes de base (`/api-v1`)
+    - API v2 : négociation de contenus + suppression (`/api-v2`)
+
 servers:
-  - url: /api-v1
-    description: API v1
-  - url: /api-v2
-    description: API v2
+  - url: http://localhost:8080
+    description: Serveur local
+  - url: https://tp6-dev.onrender.com
+    description: Serveur de production
+
+tags:
+  - name: v1
+    description: API v1 — réponses JSON uniquement
+  - name: v2
+    description: API v2 — négociation JSON/HTML + suppression
 
 components:
   securitySchemes:
@@ -18,19 +29,31 @@ components:
     Link:
       type: object
       properties:
-        url: { type: string }
-        short: { type: string }
-        created: { type: integer }
+        url:
+          type: string
+          example: AbC123
+        short:
+          type: string
+          example: http://localhost:8080/AbC123
+        created:
+          type: integer
+          example: 1727000000000
     Error:
       type: object
       properties:
-        code: { type: integer }
-        message: { type: string }
+        code:
+          type: integer
+        message:
+          type: string
 
 paths:
-  /:
+  # ============================================
+  # API v1
+  # ============================================
+  /api-v1/:
     get:
-      summary: Nombre de liens
+      tags: [v1]
+      summary: Nombre de liens existants
       responses:
         "200":
           description: OK
@@ -39,8 +62,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  count: { type: integer }
+                  count:
+                    type: integer
     post:
+      tags: [v1]
       summary: Crée un lien raccourci
       requestBody:
         required: true
@@ -49,38 +74,145 @@ paths:
             schema:
               type: object
               properties:
-                url: { type: string }
+                url:
+                  type: string
+                  example: https://perdu.com
       responses:
         "201":
           description: Créé
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/Link" }
+              schema:
+                $ref: "#/components/schemas/Link"
         "400":
-          description: URL invalide
+          description: URL manquante ou invalide
 
-  /{url}:
+  /api-v1/status/{url}:
     get:
-      summary: Informations ou redirection
+      tags: [v1]
+      summary: Statut d'un lien (JSON)
       parameters:
         - name: url
           in: path
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200": { description: OK }
-        "404": { description: Non trouvé }
+        "200":
+          description: OK
+        "404":
+          description: Non trouvé
+
+  /api-v1/{url}:
+    get:
+      tags: [v1]
+      summary: Redirige vers l'URL d'origine
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "301":
+          description: Redirection
+        "404":
+          description: Non trouvé
+
+  # ============================================
+  # API v2
+  # ============================================
+  /api-v2/:
+    get:
+      tags: [v2]
+      summary: Nombre de liens (JSON) ou page HTML
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+            text/html:
+              schema:
+                type: string
+    post:
+      tags: [v2]
+      summary: Crée un lien raccourci (JSON ou HTML)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  example: https://perdu.com
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+      responses:
+        "201":
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Link"
+        "400":
+          description: URL invalide
+
+  /api-v2/{url}:
+    get:
+      tags: [v2]
+      summary: Statut d'un lien (JSON) ou redirection (HTML)
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK (JSON)
+        "301":
+          description: Redirection (HTML)
+        "404":
+          description: Non trouvé
+
     delete:
-      summary: Supprime un lien
+      tags: [v2]
+      summary: Supprime un lien (authentifié par X-API-KEY)
       security:
         - ApiKeyAuth: []
       parameters:
         - name: url
           in: path
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200": { description: Supprimé }
-        "401": { description: Non authentifié }
-        "403": { description: Interdit }
-        "404": { description: Non trouvé }
+        "200":
+          description: Supprimé
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Deleted
+                  url:
+                    type: string
+        "401":
+          description: En-tête X-API-KEY manquant
+        "403":
+          description: Clé invalide
+        "404":
+          description: Lien inexistant
