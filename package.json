@@ -6,7 +6,7 @@
   "main": "server.mjs",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon server.mjs",
-    "prod": "cross-env NODE_ENV=production node server.mjs",
+    "prod": "node server.mjs",
     "format": "prettier \"**/*.{mjs,json,css,md}\" --write",
     "lint": "eslint \"**/*.mjs\"",
     "lint:fix": "eslint \"**/*.mjs\" --fix"
